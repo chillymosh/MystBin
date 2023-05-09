@@ -157,16 +157,16 @@ export default function OptsBar() {
         };
 
         if (!!cookieCutter.get("auth")) {
-          headers["Authorization"] = cookieCutter.get("auth");
+          headers["Authorization "] = cookieCutter.get("auth");
         }
 
-        axios( {
-          url: config["site"]["backend_site"] + "/rich-paste",
-          method: "POST",
+        axios({
+          url: config['site']['backend_site'] + '/rich-paste',
+          method: 'POST',
           headers: headers,
           data: FD,
         })
-          .then((r) => {
+          .then((r: { status: number; data: any; }) => {
             if (r.status === 201) {
               return r.data;
             }
@@ -174,23 +174,27 @@ export default function OptsBar() {
             setUploaded(false);
 
             console.error(r.status);
-            console.log(r.data)
+            console.log(r.data);
           })
-          .then((d) => {
+          .then(async (d: { id: any; }) => {
             setUploaded(true);
 
             if (d && d.id) {
-
               let path = `/${d.id}`;
               let full = window.location.origin + path;
-              navigator.clipboard.writeText(full).then(() => {
-                setSaving(false);
-                setSaveSuccessToast(d.id);
-                setTimeout(() => {
-                  router.push(path);
-                }, 3000);
-              });
+              await copyToClipboard(full);
+              return path;
             }
+          })
+          .then((path: string | any[]) => {
+            setSaving(false);
+            setSaveSuccessToast(path.slice(1));
+            setTimeout(() => {
+              router.push(path);
+            }, 3000);
+          })
+          .catch((error: any) => {
+            console.error(error);
           });
       },
       hotKey: "ctrl+s",
@@ -394,4 +398,16 @@ function OptsButton(obj: {
       </div>
     </OverlayTrigger>
   );
+}
+
+function copyToClipboard(full) {
+  if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
+    const text = new ClipboardItem({
+      'text/plain': new Blob([full], { type: 'text/plain' })
+    });
+
+    return navigator.clipboard.write([text]);
+  } else {
+    return navigator.clipboard.writeText(full);
+  }
 }
