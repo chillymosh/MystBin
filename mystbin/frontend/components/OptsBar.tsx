@@ -166,7 +166,7 @@ export default function OptsBar() {
           headers: headers,
           data: FD,
         })
-          .then((r: { status: number; data: any; }) => {
+          .then((r) => {
             if (r.status === 201) {
               return r.data;
             }
@@ -176,7 +176,7 @@ export default function OptsBar() {
             console.error(r.status);
             console.log(r.data);
           })
-          .then(async (d: { id: any; }) => {
+          .then(async (d) => {
             setUploaded(true);
 
             if (d && d.id) {
@@ -186,7 +186,7 @@ export default function OptsBar() {
               return path;
             }
           })
-          .then((path: string | any[]) => {
+          .then((path) => {
             setSaving(false);
             setSaveSuccessToast(path.slice(1));
             setTimeout(() => {
